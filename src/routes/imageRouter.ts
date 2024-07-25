@@ -4,20 +4,21 @@ import multer from "multer";
 const imageRouter = Router();
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage, dest: "data/uploads/" });
+const upload = multer({ storage: storage });
 
 imageRouter.get(
   "/",
-  imageController.getImage,
+  imageController.getImages,
   (req: Request, res: Response) => {
-    res.type("jpg").send(res.locals.image);
+    res.send({ images: res.locals.images });
   }
 );
 
 imageRouter.post(
   "/",
-  upload.array("images", 2),
-  imageController.resizeImage,
+  upload.array("images"),
+  imageController.uploadImages,
+  imageController.saveImagesToDb,
   (req: Request, res: Response) => {
     res.send({ response: res.locals.uploadedImages });
   }

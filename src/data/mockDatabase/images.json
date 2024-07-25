@@ -1,0 +1,10 @@
+[
+  {
+    "mockS3Id": "c33281e6-6045-4ae9-8fa7-4d843ddcadd0",
+    "mockS3Url": "https://mock-s3-bucket.com/c33281e6-6045-4ae9-8fa7-4d843ddcadd0.jpg"
+  },
+  {
+    "mockS3Id": "bdbda104-3932-4021-8144-ddc0bd06518b",
+    "mockS3Url": "https://mock-s3-bucket.com/bdbda104-3932-4021-8144-ddc0bd06518b.jpg"
+  }
+]

@@ -1,17 +1,33 @@
 import { Request, Response, NextFunction } from "express";
 import sharp from "sharp";
 import crypto from "crypto";
+import fs from "fs/promises";
 
 const imageController = {
-  getImage: async (req: Request, res: Response, next: NextFunction) => {
+  getImages: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { s3Id } = req.body;
+      const { mockS3Ids } = req.body;
 
-      const image = await sharp(
-        __dirname + `/../data/s3Mock/${s3Id}.jpg`
-      ).toBuffer();
+      if (mockS3Ids.length === 0) {
+        return next({
+          message: {
+            err: "imageController.getImage: ERROR: Missing image ids",
+          },
+          log: "Error occured in imageController.getImage",
+        });
+      }
 
-      res.locals.image = image;
+      const filePath = __dirname + "/../data/mockDatabase/images.json";
+
+      const data = await fs.readFile(filePath, "utf8");
+
+      const imagesJson = JSON.parse(data);
+
+      const images = imagesJson.filter((image: any) => {
+        return mockS3Ids.includes(image.mockS3Id);
+      });
+
+      res.locals.images = images;
       next();
     } catch (error: any) {
       return next({
@@ -22,24 +38,43 @@ const imageController = {
       });
     }
   },
-  resizeImage: async (req: Request, res: Response, next: NextFunction) => {
+  uploadImages: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // * Default width and height
+      const width = Number(req.body.width) || 200;
+      const height = Number(req.body.height) || 200;
+
       const files = req.files as Express.Multer.File[];
 
+      // * Validate that there are images
+      if (files.length === 0) {
+        return next({
+          message: {
+            err: "imageController.resizeImage: ERROR: Missing images",
+          },
+          log: "Error occured in imageController.resizeImage",
+        });
+      }
+
+      // * iterate through the images, resize them, then save them to a "mock" s3 bucket
       const uploadedImages: any = [];
       for (let i = 0; i < files.length; i++) {
         const image = files[i];
 
         // * Mock Saving image to an S3 Bucket
-        const newFilePath =
-          __dirname + `/../data/s3Mock/${image.originalname}.jpg`;
+        const mockS3Id = crypto.randomUUID();
+        const mockS3Url = `https://mock-s3-bucket.com/${mockS3Id}.jpg`;
+
+        const newFilePath = __dirname + `/../data/mockS3Bucket/${mockS3Id}.jpg`;
         const buffer = Buffer.from(image.buffer);
-        sharp(buffer).resize(200, 200).toFile(newFilePath);
-        // * mock creating a unique id for the image in the s3 bucket
-        const s3Id = crypto.randomUUID();
+
+        // * Save and resize the image to the "mock" s3 bucket and resize it, locally
+        await sharp(buffer).resize(width, height).toFile(newFilePath);
+
         // * create object with the s3Id
         uploadedImages.push({
-          s3Id,
+          mockS3Id,
+          mockS3Url,
         });
       }
 
@@ -53,6 +88,28 @@ const imageController = {
         },
         log: "Error occured in imageController.resizeImage",
       });
+    }
+  },
+  saveImagesToDb: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const uploadedImages = res.locals.uploadedImages;
+
+      const filePath = __dirname + "/../data/mockDatabase/images.json";
+
+      const data = await fs.readFile(filePath, "utf8");
+
+      const json = JSON.parse(data);
+
+      uploadedImages.forEach((element: any) => {
+        json.push(element);
+      });
+
+      const updatedData = JSON.stringify(json, null, 2);
+
+      await fs.writeFile(filePath, updatedData, "utf8");
+      next();
+    } catch (error) {
+      console.error("Error adding object to JSON:", error);
     }
   },
 };
