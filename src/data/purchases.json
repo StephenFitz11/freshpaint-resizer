@@ -1,0 +1,35 @@
+[
+    {
+      "timestamp": "2023-10-19T09:15:00",
+      "customer_name": "Alice",
+      "product_name": "Glow-in-the-Dark Socks",
+      "price": 5.99,
+      "quantity": 2,
+      "payment_method": "Barter System"
+    },
+    {
+      "timestamp": "2023-10-19T10:30:45",
+      "customer_name": "Bob",
+      "product_name": "Invisible Umbrella",
+      "price": 19.99,
+      "quantity": 1,
+      "payment_method": "Unicorn Tears"
+    },
+    {
+      "timestamp": "2023-10-19T12:45:20",
+      "customer_name": "Charlie",
+      "product_name": "Rubber Chicken",
+      "price": 3.49,
+      "quantity": 3,
+      "payment_method": "Leprechaun Gold"
+    },
+    {
+      "timestamp": "2023-10-19T14:00:10",
+      "customer_name": "Diana",
+      "product_name": "Whoopee Cushion",
+      "price": 2.99,
+      "quantity": 5,
+      "payment_method": "Fairy Dust"
+    }
+  ]
+  
